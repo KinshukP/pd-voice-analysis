@@ -1,0 +1,385 @@
+/* ============================================================================
+   Theme: consumer app, not a dev tool.
+   Depth and colour do the separating instead of hairline borders; type is
+   larger and more confident; controls are pill-shaped and tactile.
+
+   The two DATA colours are not a style choice. The diverging pair was run
+   through the palette validator against these exact surfaces and passes every
+   check in both modes:
+     light  #2563eb / #f97316 on #ffffff  -- CVD dE 32.8, normal 41.5
+     dark   #4d8df0 / #d96a0a on #14141c  -- CVD dE 28.6, normal 31.8
+   Changing --pos/--neg or the card surface means re-running that validator.
+   ========================================================================== */
+:root {
+  color-scheme: light;
+
+  --bg:        #f4f4fa;
+  --bg-tint:   #ebe9fb;          /* the wash behind the page */
+  --surface:   #ffffff;
+  --surface-2: #f5f5fb;          /* insets, tracks, quiet panels */
+
+  --ink:   #14141f;
+  --ink-2: #4c4c63;
+  --muted: #8a8aa3;
+  --line:  #e7e7f0;
+
+  --brand:      #5b46e5;
+  --brand-ink:  #4a37c9;         /* text on tinted brand surfaces */
+  --brand-soft: #eeebfe;
+  --brand-glow: rgba(91, 70, 229, .32);
+
+  --good:     #12a150;
+  --warning:  #d98800;
+  --critical: #dc3545;
+
+  --good-soft:     #e3f7ec;
+  --warning-soft:  #fdf2dd;
+  --critical-soft: #fdeaec;
+
+  /* data marks — validated, see header */
+  --pos: #f97316;                /* toward Parkinson's (warm pole) */
+  --neg: #2563eb;                /* toward healthy (cool pole)     */
+  --axis: #d3d3e0;
+
+  --r:    18px;
+  --r-sm: 12px;
+  --pill: 999px;
+
+  --shadow-1: 0 1px 2px rgba(20,20,31,.05), 0 4px 14px rgba(20,20,31,.05);
+  --shadow-2: 0 2px 6px rgba(20,20,31,.07), 0 16px 40px rgba(20,20,31,.09);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg:        #0a0a11;
+    --bg-tint:   #171335;
+    --surface:   #14141c;
+    --surface-2: #1c1c27;
+
+    --ink:   #f3f3f8;
+    --ink-2: #b6b6ca;
+    --muted: #7e7e97;
+    --line:  #262633;
+
+    --brand:      #8b7cff;
+    --brand-ink:  #b3a8ff;
+    --brand-soft: #211c46;
+    --brand-glow: rgba(139,124,255,.30);
+
+    --good:     #35c777;
+    --warning:  #f0ad2e;
+    --critical: #f26571;
+
+    --good-soft:     #10281c;
+    --warning-soft:  #2c2210;
+    --critical-soft: #2e1418;
+
+    --pos: #d96a0a;
+    --neg: #4d8df0;
+    --axis: #33334a;
+
+    --shadow-1: 0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.35);
+    --shadow-2: 0 2px 8px rgba(0,0,0,.5), 0 20px 48px rgba(0,0,0,.5);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  /* A soft colour wash at the top rather than a flat plane. */
+  background-image: radial-gradient(120% 60% at 50% -10%, var(--bg-tint) 0%, transparent 62%);
+  background-repeat: no-repeat;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- shell ----------
+   .wrap spans the full viewport height as a column: a header that stays put,
+   then .main which takes the rest and centers whatever the page hands it.
+   `align-content: safe center` is the reason a short page (Sex) and a long,
+   scrolling one (Results) both work with the same rule -- it centers when the
+   content fits the viewport, and falls back to top-aligned instead of clipping
+   when it doesn't. */
+.wrap { min-height: 100dvh; display: flex; flex-direction: column; }
+
+.topbar {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  gap: 10px; padding: 22px 20px 18px;
+}
+.brand {
+  display: flex; align-items: center; gap: 9px;
+  font-size: .95rem; font-weight: 650; letter-spacing: -.01em; color: var(--ink);
+}
+.brand .mark {
+  width: 26px; height: 26px; border-radius: 8px; flex: 0 0 auto;
+  background: linear-gradient(140deg, var(--brand), #a78bfa);
+  box-shadow: 0 2px 8px var(--brand-glow);
+  display: grid; place-items: center;
+}
+/* Pinned to the corner rather than sharing the centered row, so it doesn't
+   pull the logo off-center. */
+.start-over { position: absolute; top: 18px; right: 20px; }
+
+.steps-row { display: flex; align-items: center; justify-content: center; gap: 8px;
+             margin-bottom: 26px; }
+.steps-row i {
+  width: 44px; height: 5px; border-radius: var(--pill); background: var(--line);
+  display: block; transition: background .25s;
+}
+.steps-row i.on   { background: var(--brand); }
+.steps-row i.done { background: var(--brand-ink); opacity: .55; }
+
+.main {
+  flex: 1; min-height: 0; display: grid; align-content: safe center;
+  justify-items: center; padding: 10px 20px 96px;
+}
+.main-inner { width: 100%; max-width: 720px; }
+
+/* ---------- type ---------- */
+h1 { font-size: clamp(2rem, 6vw, 2.6rem); line-height: 1.1; letter-spacing: -.032em;
+     font-weight: 700; margin: 0 0 12px; }
+h2.page { font-size: clamp(1.5rem, 4vw, 1.9rem); line-height: 1.2; letter-spacing: -.024em;
+          font-weight: 680; margin: 0 0 10px; }
+.sub { color: var(--ink-2); margin: 0 0 26px; font-size: 1rem; max-width: 60ch; }
+h4 { font-size: .95rem; font-weight: 650; letter-spacing: -.01em; color: var(--ink);
+     margin: 30px 0 12px; }
+.hint { font-size: .875rem; color: var(--muted); margin: 12px 0 0; line-height: 1.55; }
+.count { font-size: .875rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- surfaces ---------- */
+.card {
+  background: var(--surface); border-radius: var(--r); padding: 26px;
+  margin-bottom: 16px; box-shadow: var(--shadow-1);
+}
+.card.flush { padding: 20px 22px; }
+
+/* ---------- controls ---------- */
+button { font: inherit; cursor: pointer; border: none; border-radius: var(--pill);
+         padding: 11px 20px; font-weight: 560; letter-spacing: -.005em;
+         background: var(--surface-2); color: var(--ink);
+         transition: transform .12s ease, box-shadow .18s ease, background .18s ease, opacity .18s; }
+button:hover:not(:disabled)  { background: var(--line); }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+button.primary {
+  background: linear-gradient(135deg, var(--brand), #7c5cff);
+  color: #fff; box-shadow: 0 4px 16px var(--brand-glow);
+}
+button.primary:hover:not(:disabled) { box-shadow: 0 6px 22px var(--brand-glow); opacity: .95; }
+button.big { padding: 15px 30px; font-size: 1.05rem; border-radius: var(--pill); }
+button.ghost { background: transparent; color: var(--muted); }
+button.ghost:hover:not(:disabled) { background: var(--surface-2); color: var(--ink); }
+button.soft { background: var(--brand-soft); color: var(--brand-ink); }
+button.soft:hover:not(:disabled) { background: var(--brand-soft); opacity: .8; }
+
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.between { justify-content: space-between; }
+.pushright { margin-left: auto; }
+
+/* ---------- start page ---------- */
+.hero-copy { font-size: 1.08rem; color: var(--ink-2); margin: 0 0 4px; max-width: 58ch; }
+.steplist { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 14px; }
+.steplist li { display: flex; gap: 14px; align-items: flex-start; font-size: .97rem; }
+.steplist .n {
+  flex: 0 0 30px; height: 30px; border-radius: var(--pill);
+  background: var(--brand-soft); color: var(--brand-ink);
+  font-size: .85rem; font-weight: 700;
+  display: grid; place-items: center;
+}
+.steplist b { display: block; font-weight: 620; }
+.steplist span.t { color: var(--ink-2); font-size: .9rem; }
+
+/* ---------- sex page ---------- */
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.choice {
+  padding: 28px 22px; border-radius: var(--r); background: var(--surface);
+  box-shadow: var(--shadow-1); text-align: center; font-size: 1.1rem; font-weight: 600;
+  display: grid; gap: 10px; justify-items: center;
+  outline: 2px solid transparent; outline-offset: -2px;
+}
+.choice:hover:not(:disabled) { background: var(--surface); box-shadow: var(--shadow-2); }
+.choice.sel { outline-color: var(--brand); background: var(--surface); }
+.choice .glyph {
+  width: 46px; height: 46px; border-radius: var(--pill); display: grid; place-items: center;
+  background: var(--brand-soft); color: var(--brand-ink); font-size: 1.35rem; font-weight: 700;
+}
+.choice small { color: var(--muted); font-size: .8rem; font-weight: 480; }
+@media (max-width: 520px) { .choices { grid-template-columns: 1fr } }
+
+/* ---------- record page ---------- */
+.rec-cta { display: grid; gap: 14px; justify-items: center; padding: 8px 0 4px; }
+.rec-btn {
+  width: 92px; height: 92px; border-radius: var(--pill);
+  background: linear-gradient(135deg, var(--brand), #7c5cff);
+  box-shadow: 0 8px 28px var(--brand-glow);
+  display: grid; place-items: center; padding: 0;
+}
+.rec-btn:hover:not(:disabled) { background: linear-gradient(135deg, var(--brand), #7c5cff); }
+.rec-btn .dot { width: 30px; height: 30px; border-radius: var(--pill); background: #fff; }
+
+ul.takes { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
+ul.takes li {
+  display: flex; align-items: center; gap: 12px; font-size: .9rem;
+  background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px;
+}
+.grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.take-badge {
+  font-size: .7rem; font-weight: 650; letter-spacing: .02em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: var(--pill); background: var(--brand-soft);
+  color: var(--brand-ink); flex: 0 0 auto;
+}
+.x { background: none; padding: 4px 8px; color: var(--muted); border-radius: var(--pill); }
+.x:hover { background: var(--critical-soft); color: var(--critical); }
+audio { height: 32px; max-width: 190px; }
+
+/* ---------- countdown ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 99; display: flex;
+  align-items: center; justify-content: center; flex-direction: column;
+  background: var(--bg);
+  background-image: radial-gradient(90% 60% at 50% 40%, var(--bg-tint) 0%, transparent 70%);
+}
+.dial { position: relative; width: min(52vmin, 300px); height: min(52vmin, 300px); }
+.dial svg { width: 100%; height: 100%; display: block; }
+.ring-bg { fill: none; stroke: var(--line); stroke-width: 6; }
+.ring-fg { fill: none; stroke: var(--brand); stroke-width: 6; stroke-linecap: round;
+           transform: rotate(-90deg); transform-origin: 50% 50%;
+           filter: drop-shadow(0 0 10px var(--brand-glow)); }
+.ring-fg.live { stroke: var(--critical); filter: drop-shadow(0 0 12px rgba(220,53,69,.4)); }
+.ov-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+          font-size: clamp(54px, 13vmin, 108px); font-weight: 700;
+          letter-spacing: -.04em; line-height: 1; }
+.ov-num.pop { animation: pop .26s cubic-bezier(.2,.8,.3,1); }
+@keyframes pop { from { transform: scale(.82); opacity: .35 } to { transform: scale(1); opacity: 1 } }
+.ov-cue { margin-top: 40px; font-size: 1.25rem; font-weight: 620; letter-spacing: -.015em; }
+.ov-sub { margin-top: 8px; font-size: .95rem; color: var(--muted); }
+.ov-cancel { margin-top: 30px; display: flex; align-items: center; gap: 9px; background: transparent;
+             color: var(--muted); }
+.ov-cancel:hover { background: var(--surface-2); color: var(--ink); }
+.kbd { font-size: .72rem; border-radius: 6px; padding: 2px 6px;
+       background: var(--surface-2); color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .ov-num.pop { animation: none } }
+
+/* ---------- result ---------- */
+/* The verdict card carries its own tinted surface, so status reads instantly --
+   still paired with an icon and a label, never colour alone. */
+.verdict { border-radius: var(--r); padding: 24px 26px; margin-bottom: 18px;
+           display: flex; gap: 16px; align-items: flex-start; box-shadow: var(--shadow-1); }
+.verdict .ico { flex: 0 0 auto; margin-top: 2px; }
+.verdict h3 { margin: 0 0 5px; font-size: 1.3rem; letter-spacing: -.02em; font-weight: 680; }
+.verdict p  { margin: 0; font-size: .93rem; color: var(--ink-2); }
+.v-pd  { background: var(--critical-soft); } .v-pd h3  { color: var(--critical); }
+.v-unc { background: var(--warning-soft);  } .v-unc h3 { color: var(--warning); }
+.v-hc  { background: var(--good-soft);     } .v-hc h3  { color: var(--good); }
+
+.lean { font-size: 1.05rem; color: var(--ink-2); margin: 0 0 20px; }
+.lean b { color: var(--ink); font-weight: 640; }
+
+.statgrid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px; }
+.stat { background: var(--surface); border-radius: var(--r); padding: 22px; box-shadow: var(--shadow-1); }
+.stat .lab { font-size: .875rem; color: var(--muted); margin-bottom: 8px; }
+.hero { font-size: clamp(42px, 9vw, 56px); font-weight: 700; line-height: 1;
+        letter-spacing: -.035em; }
+.hero-unit { font-size: .4em; font-weight: 600; color: var(--muted); margin-left: 3px; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 680; text-transform: uppercase;
+       letter-spacing: .04em; padding: 4px 10px; border-radius: var(--pill);
+       background: var(--brand-soft); color: var(--brand-ink); margin-top: 12px; }
+.meter { height: 8px; background: var(--surface-2); border-radius: var(--pill);
+         overflow: hidden; margin: 14px 0 0; }
+.meter > div { height: 100%; border-radius: var(--pill);
+               background: linear-gradient(90deg, var(--brand), #7c5cff); transition: width .5s ease; }
+.facets { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.facet { background: var(--surface); border-radius: var(--r); padding: 20px; box-shadow: var(--shadow-1); }
+.facet .lab { font-size: .85rem; color: var(--ink-2); display: flex; justify-content: space-between;
+              font-weight: 560; }
+.facet .meter { height: 6px; }
+@media (max-width: 560px) { .statgrid, .facets { grid-template-columns: 1fr } }
+
+/* Deliberately loud: a simulated result must never be mistaken for a real one. */
+.demo-strip { border: 2px dashed var(--warning); background: var(--warning-soft);
+              color: var(--warning); border-radius: var(--r); padding: 14px 18px;
+              margin-bottom: 18px; font-size: .88rem; line-height: 1.5; }
+.demo-strip b { display: block; margin-bottom: 3px; color: var(--warning); }
+
+figure { margin: 0; }
+figcaption { font-size: .875rem; color: var(--muted); margin-bottom: 10px; }
+.legend { display: flex; gap: 18px; font-size: .85rem; color: var(--ink-2); margin: 0 0 12px; }
+.legend i { width: 11px; height: 11px; border-radius: 4px; display: inline-block; margin-right: 7px; }
+svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.c-label { font-size: 12.5px; fill: var(--ink-2); }
+.c-val   { font-size: 11.5px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.c-axis  { stroke: var(--axis); stroke-width: 1; }
+.c-tick  { font-size: 11px; fill: var(--muted); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 7px 13px;
+        border-radius: var(--pill); background: var(--surface-2); color: var(--ink-2); }
+.chip .sw { width: 9px; height: 9px; border-radius: var(--pill); flex: 0 0 auto; }
+.excl { font-size: .88rem; color: var(--ink-2); background: var(--surface-2);
+        border-radius: var(--r-sm); padding: 12px 14px; margin-top: 10px;
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.excl b { color: var(--ink); font-weight: 620; }
+.excl .why { color: var(--muted); flex: 1 1 260px; }
+.override { font-size: .8rem; padding: 6px 13px; background: var(--surface); color: var(--ink-2);
+            box-shadow: var(--shadow-1); }
+.override:hover:not(:disabled) { background: var(--surface); color: var(--brand-ink); }
+.override.undo:hover:not(:disabled) { color: var(--critical); }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; margin-top: 12px; }
+th, td { text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 620; font-size: .8rem; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.linkish { background: none; padding: 0; color: var(--brand-ink); font-size: .88rem;
+           font-weight: 560; text-decoration: underline; text-underline-offset: 3px; }
+.linkish:hover { background: none; opacity: .75; }
+.err { color: var(--critical); font-size: .92rem; background: var(--critical-soft);
+       padding: 12px 14px; border-radius: var(--r-sm); margin-top: 14px; }
+.disclaimer { font-size: .85rem; color: var(--muted); line-height: 1.6;
+              background: var(--surface-2); border-radius: var(--r); padding: 16px 18px;
+              margin-top: 28px; }
+
+/* ============================================================================
+   Print / "Download PDF" -- Results.jsx calls window.print() rather than
+   rendering a separate PDF client-side, so the export is guaranteed to match
+   the on-screen page (it prints the same DOM) instead of a second
+   implementation that can drift out of sync.
+   ========================================================================== */
+@media print {
+  @page { margin: 16mm 14mm; }
+
+  /* Printed output is always the light palette, regardless of the viewer's
+     OS/browser dark-mode setting -- a dark background wastes ink and most
+     PDF viewers/printers don't expect it. This selector matches the
+     specificity of the dark-mode rule (:root:not([data-theme="light"]),
+     0-2-0) and sits later in the file, so it wins the tie by source order. */
+  :root:not([data-theme="light"]) {
+    --bg: #f3f3f9; --bg-tint: #e9e6fb; --surface: #ffffff; --surface-2: #f4f4fa;
+    --ink: #14141f; --ink-2: #50506a; --muted: #8b8ba6; --line: #e8e8f1;
+    --brand: #5b46e5; --brand-ink: #4634c4; --brand-soft: #eeebfe;
+    --good: #0f9d55; --warning: #c97f00; --critical: #d93443;
+    --good-soft: #e4f7ed; --warning-soft: #fdf3de; --critical-soft: #fdebed;
+    --pos: #f97316; --neg: #2563eb; --axis: #d6d6e2;
+  }
+
+  /* Backgrounds, tints and chart fills are the content here, not decoration --
+     without this, browsers drop them by default to save ink and the verdict
+     card, chips and chart would print as plain outlines. */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  body { background: #fff; }
+
+  /* On screen this centers content in the viewport; on paper there is no
+     viewport, only pages, so it reverts to plain top-to-bottom flow. */
+  .wrap { display: block; min-height: 0; }
+  .main { display: block; padding: 0; }
+
+  /* Controls, navigation and re-analysis actions -- nothing a static document
+     can act on anyway. */
+  .no-print { display: none !important; }
+}

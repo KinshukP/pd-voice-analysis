@@ -1,0 +1,29 @@
+# Build step 1 — feature extraction only.
+#
+# Setup (Python 3.11; librosa's numba dependency has no 3.14 wheels yet):
+#   /opt/anaconda3/bin/python3.11 -m venv .venv
+#   .venv/bin/python -m pip install -r requirements.txt
+#
+# If pip fails with CERTIFICATE_VERIFY_FAILED, Anaconda's cert bundle symlink is
+# broken; prefix the command with SSL_CERT_FILE=/etc/ssl/cert.pem.
+
+librosa==0.11.0
+praat-parselmouth==0.4.7
+soundfile==0.14.0
+sounddevice==0.5.5  # scripts/record_takes.py; bundles PortAudio, no system install
+numpy==2.4.6
+scipy==1.17.1
+pandas==3.0.5
+
+# models/*.joblib was pickled under scikit-learn 1.6.1 and must be loaded under
+# it. Newer versions fail outright (1.9.0: ModuleNotFoundError: '_loss').
+# Do not bump this without re-saving the model artifacts.
+scikit-learn==1.6.1
+joblib==1.5.3
+shap==0.51.0
+
+# Backend. Serve with:
+#   .venv/bin/uvicorn pdvoice.api:app --reload
+fastapi==0.141.1
+uvicorn==0.52.3
+python-multipart==0.0.32  # required by FastAPI for multipart file uploads
