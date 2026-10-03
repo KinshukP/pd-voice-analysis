@@ -2,7 +2,6 @@
 
 Local demo application for the Parkinson's voice-screening prototype. It has a React/Vite frontend and a FastAPI backend. This is a screening demo, not a diagnostic tool.
 
-## Run on a new Windows laptop (VS Code)
 
 ### 1. Install prerequisites
 
@@ -21,23 +20,7 @@ cd pd-voice-analysis
 code .
 ```
 
-### 3. Copy the model files separately
-
-The `models/` folder is intentionally excluded from GitHub. Copy it from the demo laptop to the new laptop using a private USB drive or other secure transfer, then place it in the project root:
-
-```text
-pd-voice-analysis/
-  models/
-    confidence_v2.joblib
-    detector_v2.joblib
-    detector_v2_concepts.joblib
-    detector_v2_data.joblib
-    detector_v2_shap.joblib
-```
-
-Do not commit or upload these model files to the public repository.
-
-### 4. Install the Python packages
+### 3. Install the Python packages
 
 From the project root:
 
@@ -56,7 +39,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 In VS Code, select `.venv\Scripts\python.exe` as the Python interpreter when prompted.
 
-### 5. Install the frontend packages
+### 4. Install the frontend packages
 
 ```powershell
 cd frontend
@@ -108,7 +91,7 @@ cd frontend
 npm ci
 ```
 
-Do not use `npm update` for demos: `npm ci` keeps frontend package versions in sync with the repository. If model files change, copy the updated `models/` folder separately as in step 3.
+Do not use `npm update` for demos: `npm ci` keeps frontend package versions in sync with the repository. The required model files are included in the repository, so `git pull` also retrieves model updates.
 
 ## Wi-Fi demo (optional)
 
